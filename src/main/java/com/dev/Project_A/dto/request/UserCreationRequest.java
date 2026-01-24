@@ -1,10 +1,19 @@
 package com.dev.Project_A.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 import java.time.LocalDate;
 
 public class UserCreationRequest {
+
+    @Size(min = 3, message = "Username must be at least 3 characeters")
     private  String username;
+
+    @NotBlank(message = "Password cannot be blank")
+    @Size(min = 8, message = "Password must be at least 8 characters")
     private String password;
+
     private String firstName;
     private String lastName;
     private LocalDate dob;
