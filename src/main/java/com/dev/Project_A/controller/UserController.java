@@ -1,5 +1,6 @@
 package com.dev.Project_A.controller;
 
+import com.dev.Project_A.dto.request.ApiResponse;
 import com.dev.Project_A.dto.request.UserCreationRequest;
 import com.dev.Project_A.dto.request.UserUpdateRequest;
 import com.dev.Project_A.entity.User;
@@ -17,8 +18,12 @@ public class UserController {
     private UserService userService;
 
     @PostMapping()
-    User createUser(@Valid @RequestBody UserCreationRequest request) {
-        return userService.createUser(request);
+    ApiResponse<User> createUser(@Valid @RequestBody UserCreationRequest request) {
+        ApiResponse<User> apiResponse = new ApiResponse<>();
+
+        apiResponse.setResult(userService.createUser(request));
+
+        return apiResponse;
     }
     @GetMapping
     List<User> getUsers(){
