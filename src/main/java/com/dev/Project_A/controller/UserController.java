@@ -3,6 +3,7 @@ package com.dev.Project_A.controller;
 import com.dev.Project_A.dto.request.ApiResponse;
 import com.dev.Project_A.dto.request.UserCreationRequest;
 import com.dev.Project_A.dto.request.UserUpdateRequest;
+import com.dev.Project_A.dto.response.UserResponse;
 import com.dev.Project_A.entity.User;
 import com.dev.Project_A.service.UserService;
 import jakarta.validation.Valid;
@@ -31,12 +32,12 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    User getUser(@PathVariable("userId") String userId){
+    UserResponse getUser(@PathVariable("userId") String userId){
         return userService.getUser(userId);
     }
 
     @PutMapping("/{userId}")
-    User updateUser(@PathVariable String userId, @RequestBody UserUpdateRequest request){
+    UserResponse updateUser(@PathVariable String userId, @RequestBody UserUpdateRequest request){
         return userService.updateUser(userId, request);
     }
 
