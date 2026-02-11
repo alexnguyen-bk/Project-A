@@ -1,21 +1,27 @@
 package com.dev.Project_A.service;
 
 import com.dev.Project_A.dto.request.AuthenticationRequest;
+import com.dev.Project_A.dto.request.IntrospectRequest;
 import com.dev.Project_A.dto.response.AuthenticationResponse;
+import com.dev.Project_A.dto.response.IntrospectResponse;
 import com.dev.Project_A.exception.AppException;
 import com.dev.Project_A.exception.ErrorCode;
 import com.dev.Project_A.repository.UserRepository;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -29,14 +35,32 @@ public class AuthenticationService {
     UserRepository userRepository;
 
     @NonFinal
-    protected static final String SINGER_KEY =
-            "4r9ppmPl5s1WCsqaR4op1Po61ihL49qcJ4RMBh2ontgJMTQyJqUIHLp5OsHyuw15";
+    @Value("${jwt.signerKey}")
+    protected String SINGER_KEY;
 //    public boolean authenticate(AuthenticationRequest request){
 //        var user = userRepository.findByUsername(request.getUsername())
 //                .orElseThrow(()-> new AppException(ErrorCode.USER_NOT_EXISTS));
 //        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
 //        return passwordEncoder.matches(request.getPassword(), user.getPassword());
 //    }
+
+    public IntrospectResponse introspect(IntrospectRequest request) throws JOSEException, ParseException {
+        var token = request.getToken();
+
+        JWSVerifier verifier = new MACVerifier(SINGER_KEY.getBytes());
+        SignedJWT signedJWT = SignedJWT.parse(token);
+        Date expityTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+
+        var verified = signedJWT.verify(verifier);
+
+        return IntrospectResponse.builder()
+                .valid(verified && expityTime.after(new Date()))
+                .build();
+
+
+    }
+
+
     public AuthenticationResponse authenticate(AuthenticationRequest request){
         var user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(()-> new AppException(ErrorCode.USER_NOT_EXISTS));
